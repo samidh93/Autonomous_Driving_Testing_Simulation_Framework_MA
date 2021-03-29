@@ -1,0 +1,363 @@
+# gitlab-ci yaml: launch a pipeline on every new push (see Pipeline Gui)
+# Stages: 1-Build Adore,2-unit-test, 3-test Scenarios , 4-evaluation deploy
+# 1: build adore in docker container
+# 2: run unit test after building
+# 3: launch all test scenarios and evaluate the results
+# 4: based onevaluation deploy the scenario:
+#    - publish scenario to production
+#    - derivate paramter for scenario
+# Jobs: Jobs are run once in stage 1 and 2, in parallel in stage 3 and 4 using the same runner
+# Branch: developCi
+# Ressources: Gitlab-ci, gitlab-runner, Docker
+# Version: Latest
+# Note: if permission issue starting a pipeline use: sudo gitlab-runner run
+
+variables:
+  SharedVol: "/home/sd/SharedVol"
+
+stages:
+  - build
+  - unit_test
+  - ci_scenarios
+  - evaluation_deploy
+
+build_adore:
+  stage: build
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+  script:
+    #- sudo apt-get update -qy
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+    - docker stop $(docker ps -aq) || true #stop running container: || true =1 if no container already found
+    - docker rm $(docker ps -aq) || true # remove them
+    - docker container prune # Removes all stopped containers.
+    - sudo rm -r $SharedVol/ || true
+    - sudo mkdir -p $SharedVol/ || true
+    - sudo cp -r $CI_PROJECT_DIR/ $SharedVol/
+    - export adore_libadore_branch=developCi
+    - >
+      docker run 
+      --name test_cont -idt --entrypoint=/bin/bash
+      -e adore_libadore_branch=$adore_libadore_branch 
+      -e CI_JOB_TOKEN=$CI_JOB_TOKEN 
+      -v /usr/share/adore_external_cache:/home/adore_external_cache 
+      -v $SharedVol/adore/:/home/adore_repo
+      -v $SharedVol/adore/:/home/outputdir  
+      gitlabciadore/adoreci:v0.1
+
+    - docker exec -t test_cont "/home/adore_repo/test/ci/runner_script.bash"
+    #- docker exec -t test_cont bash -c " sudo echo 'source /home/adore_workspace_dir/install/setup.bash' >> ~/.bashrc && source ~/.bashrc"
+    #- docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario.bash"
+    - docker container stop test_cont
+    - sudo mkdir -p $CI_PROJECT_DIR/build/
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      #- build/*.bag
+
+ctest:
+  stage: unit_test
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c "cd /home/adore_workspace_dir/build/adore_if_ros && ctest && touch /home/outputdir/build/variables"
+    - docker container stop test_cont
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+  retry:
+    max: 2
+    when:
+      - script_failure
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      #- build/*.bag
+      - build/variables
+
+test0:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - echo $CI_PROJECT_DIR
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_template.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_template.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test1:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_1.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_1.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test2:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_2.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_2.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test3:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_3.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_3.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test4:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_4.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_4.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test5:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_5.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_5.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test6:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_6.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_6.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test7:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_7.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_7.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test8:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_8.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_8.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test9:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_9.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_9.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+test10:
+  stage: ci_scenarios
+  tags: [ci_test]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "developCi"'
+      allow_failure: true
+
+  script:
+    - docker container start test_cont
+    - docker exec -t test_cont bash -c 'chmod +x /home/adore_workspace_dir/src/adore/test/ci/testScenario_10.bash'
+    - docker exec -t test_cont "/home/adore_workspace_dir/src/adore/test/ci/testScenario_10.bash"
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
+
+evaluate:
+  stage: evaluation_deploy
+  tags: [ci_test]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "developCi"
+  script:
+    - cat $SharedVol/adore/build/variables | while read line || [[ -n $line ]]; do echo "succeful test's name:$line"; done
+    - sudo cp -r $SharedVol/adore/build/* $CI_PROJECT_DIR/build/
+    - sudo chmod 777 -R /home/sd/gitlab-runner/ || true
+    - docker stop $(docker ps -aq) || true #stop running container: || true =1 if no container already found
+    - docker rm $(docker ps -aq) || true # remove them
+    - docker container prune # Removes all stopped containers.
+
+  artifacts:
+    when: always
+    paths:
+      - build/*.txt
+      - build/*.log
+      - build/*.bag
+      - build/test_ci*/*.csv
+      - build/variables
