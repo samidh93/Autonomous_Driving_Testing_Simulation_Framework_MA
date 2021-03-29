@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Do 04 Feb 2021 00:37:22 CET by Eclipse SUMO netedit Version 1.8.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+    </processing>
+
+    <junctions>
+        <no-internal-links value="false"/>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.5"/>
+        <rectangular-lane-cut value="true"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="false"/>
+    </pedestrian>
+
+    <netedit>
+        <route-files value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex004_r.rou.xml"/>
+    </netedit>
+
+    <report>
+        <aggregate-warnings value="5"/>
+    </report>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vType id="normal" maxSpeed="40.00"/>
+    <vType id="sport" maxSpeed="60.00"/>
+    <vType id="trucks" maxSpeed="20.00" minGap="10.00" speedFactor="0.5" accel="0.5" vClass="truck"/>
+    <flow id="flow_0" type="sport" begin="0.00" departLane="2" arrivalLane="2" from="gneE116" to="gneE116.403" via="gneE116.143" end="3600.00" number="1800"/>
+    <flow id="flow_1" type="normal" begin="0.00" departLane="1" arrivalLane="1" from="gneE116" to="gneE116.403" via="gneE116.143" end="3600.00" number="1800"/>
+    <flow id="flow_2" type="trucks" begin="0.00" from="gneE116" to="gneE116.403" via="gneE116.143" end="200" number="100"/>
+</routes>

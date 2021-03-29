@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Mi 03 Feb 2021 14:18:47 CET by Eclipse SUMO netedit Version 1.8.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+    </processing>
+
+    <junctions>
+        <no-internal-links value="false"/>
+        <no-turnarounds value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.5"/>
+        <rectangular-lane-cut value="true"/>
+    </junctions>
+
+    <pedestrian>
+        <walkingareas value="false"/>
+    </pedestrian>
+
+    <netedit>
+        <route-files value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.rou.xml"/>
+    </netedit>
+
+    <report>
+        <aggregate-warnings value="5"/>
+    </report>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <vType id="type1" accel="1" decel="4.5" sigma="0.5" length="5" maxSpeed="5" speedFactor="1" minGap="5"/>
+    <flow id="flow_0" begin="0.00" departPos="25.00" departSpeed="0.00" arrivalSpeed="5.00" from="-gneE29" to="gneE24" via="-gneE28" end="50.00" number="20" type="type1"/>
+</routes>

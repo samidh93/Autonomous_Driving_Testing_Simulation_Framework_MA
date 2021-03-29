@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Do 04 Feb 2021 15:30:55 CET by Eclipse SUMO netedit Version 1.8.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.min-radius.fix.railways value="false"/>
+        <geometry.max-grade.fix value="false"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+    </processing>
+
+    <junctions>
+        <no-internal-links value="false"/>
+        <no-turnarounds value="true"/>
+        <junctions.join-same value="true"/>
+        <junctions.corner-detail value="5"/>
+        <junctions.limit-turn-speed value="5.5"/>
+        <rectangular-lane-cut value="true"/>
+    </junctions>
+
+    <pedestrian>
+        <sidewalks.guess value="true"/>
+        <walkingareas value="false"/>
+    </pedestrian>
+
+    <netedit>
+        <additional-files value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex.add.xml"/>
+        <route-files value="/home/sd/catkin_ws/src/adore/test/tracks/complex/complex004_round.rou.xml"/>
+    </netedit>
+
+    <report>
+        <aggregate-warnings value="5"/>
+    </report>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+    <trip id="vehicle_0" depart="0.00" from="-1.157.08.35" to="-gneE53">
+        <stop parkingArea="parkingArea_-gneE53_0_0" duration="60.00"/>
+    </trip>
+    <flow id="flow_3" begin="0.00" departLane="1" departPos="20.00" arrivalLane="1" from="-1.0.00.78" to="gneE6" via="-1.0.00.118" end="50.00" number="20"/>
+</routes>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on Di 02 Feb 2021 20:52:57 CET by Eclipse SUMO GUI Version v1_8_0+0713-53914b0267
+-->
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="complex.net.xml"/>
+        <route-files value="complex004_cross.rou.xml"/>
+    </input>
+
+</configuration>
