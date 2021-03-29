@@ -1,0 +1,9 @@
+<!--********************************************************************************
+test all test scenarios launch file in one launch
+ ********************************************************************************-->
+<launch>
+    <!--include all tests launch files at one-->
+    <include file="$(dirname)/test_ci_template.launch"/>
+    <include file="$(dirname)/test_ci_1.launch"/>
+    <include file="$(dirname)/test_ci_2.launch"/>
+</launch>

@@ -1,0 +1,52 @@
+<!--********************************************************************************
+ * Copyright (C) 2017-2020 German Aerospace Center (DLR). 
+ * Eclipse ADORe, Automated Driving Open Research https://eclipse.org/adore
+ *
+ * This program and the accompanying materials are made available under the 
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 
+ *
+ * Contributors: 
+ *   Sami Dhiab - Test Scenarios Generation
+ * test003: lane change
+ *   Lane Switching/ Overtaking
+ *   Enhancing Conspicuity
+ *   (e.g., blinkers)
+ *   Merge (high &low speed)
+ ********************************************************************************-->
+<launch>
+  <group ns="vehicle3">
+    <arg name="record_rosbag" default="true" />
+    <!-- this starts the rosbag recording - name of the bag should be same as launchfile -->
+    <node pkg="rosbag" type="record" name="sim_rosbag_recorder" args="record -O /home/outputdir/build/test_ci_3.bag -a"
+      if="$(arg record_rosbag)"/>
+    <!-- Load Timer Node , output onto Terminal -->
+    <node name="timer" pkg="adore_if_ros" type="adore_timer_node" output="screen" required="true"/>
+    <!-- this node is important to have the scenario stop at time /PARAMS/SIM/timeout -->
+    <param name="/PARAMS/SIM/timeout" value="100" type="double"/>
+    <node pkg="adore_if_ros" name="terminator" type="adore_ci_terminator_node.py" output="screen" required="true"/>
+    <node name="sumotraffic2ros_node" pkg="sumo_if_ros" type="sumotraffic2ros_node" /> <!-- output="screen"/>-->
+    <!-- Load sut Parameter -->
+    <include file="$(dirname)/sut1.launch"/>
+    <!-- load Track Parameter -->
+    <param name="PARAMS/track" value="$(dirname)/../tracks/complex/complex.xodr" type="str" />
+    <param name="PARAMS/map_provider/activate_plotting" value="false" type="bool" />
+    <!-- assign sim id -->
+    <param name="simulationID" value="0" type="int" />  
+    <!-- publish startpos and orientation on topic -->  
+    <node pkg="rostopic" type="rostopic" name="posereset" args="pub /vehicle3/SIM/ResetVehiclePose geometry_msgs/Pose '{position: {x: -170, y: 155.85, z: 0},orientation: {w: 1}}'"/>
+    <!-- change speed parameter of ego vehicle -->
+    <param name="PARAMS/tactical_planner/global_speed_limit" value="14" type="double" />  <!---22.66,117.29, 107.41,1.92, -135.75,48.10-->
+    <!-- set the goal position -->
+    <node pkg="rostopic" type="rostopic" name="navgoal" args="pub /vehicle3/ENV/NavigationGoal adore_if_ros_msg/NavigationGoal '{target: {x: -1.33, y: 156.63, z: 0}}'"/>
+    <!-- Load Sumo params-->
+
+    <arg name="sumocfg" value="$(dirname)/../tracks/complex/complex003.sumocfg"/>
+    <arg name="sumohome" value="$(env SUMO_HOME)"/>
+    <arg name="traciport" value="1337"/>
+    <arg name="sumostep" value="0.01"/>
+    <node name="sumo" pkg="sumo_if_ros" type="start_sumo.sh" output="screen" args="$(arg sumohome) $(arg sumocfg) $(arg traciport) $(arg sumostep)"/>
+  </group>
+</launch>

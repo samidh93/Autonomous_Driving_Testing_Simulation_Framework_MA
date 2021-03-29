@@ -1,0 +1,35 @@
+
+ <!--********************************************************************************
+ Test Ci Template 
+  Warning: to start multiple launch files in parallel, 
+  the nodes in commun should be under differents group namespace, 
+  RosMAster should be exported with differents ports
+  Warning2: timeout should have same value accros all launch files because the
+  terminator will terminate the timer node for all launch otherwise.
+ ********************************************************************************-->
+<launch>
+  <group ns="vehicle0">
+    <arg name="record_rosbag" default="true" />
+  <!-- this starts the rosbag recording - name of the bag should be same as launchfile -->
+    <node pkg="rosbag" type="record" name="sim_rosbag_recorder" args="record -O /home/outputdir/build/test_ci.bag -a"
+       if="$(arg record_rosbag)" />
+    <param name="/PARAMS/SIM/timeout" value="60.0" type="double"/>
+    <param name="/PARAMS/SIM/outputfile" value="/home/sd/outputdir/results.txt" type="str"/>
+  <!-- this node is important to have the scenario stop at time /PARAMS/SIM/timeout -->
+    <node pkg="adore_if_ros" name="terminator" type="adore_ci_terminator_node.py" output="screen" required="true"/>
+  <!-- this node generates clock signal -->
+    <node name="timer" pkg="adore_if_ros" type="adore_timer_node" output="screen" required="true"/>
+  <!-- Load sut Parameter -->
+    <include file="$(dirname)/sut.launch"/>
+    <param name="PARAMS/map_provider/activate_plotting" value="false" type="bool" />
+    <param name="PARAMS/track" value="$(dirname)/../tracks/basic_test_track.xodr" type="str" />
+    <param name="simulationID" value="0" type="int" />  
+    <!-- do not start anything that tries to plot -->
+    <!-- <node pkg="adore_if_ros" name="plotter" type="adore_borderbird_node"/> -->
+    <node pkg="rostopic" type="rostopic" name="posereset" args="pub /vehicle0/SIM/ResetVehiclePose geometry_msgs/Pose '{position: {x: 150, y: 162, z: 0},orientation: { w: 1}}'"/>
+    <!-- set the goal position -->
+    <node pkg="rostopic" type="rostopic" name="navgoal" args="pub /vehicle0/ENV/NavigationGoal adore_if_ros_msg/NavigationGoal '{target: {x: 300, y: 162, z: 0}}'"/>
+    <!-- inccrease speed of this vehicle -->
+    <param name="PARAMS/tactical_planner/global_speed_limit" value="30" type="double" />  
+  </group>
+</launch>
